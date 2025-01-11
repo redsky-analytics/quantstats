@@ -290,7 +290,7 @@ def plot_timeseries(
                 benchmark = benchmark.cumsum()
 
     if resample:
-        returns = returns.resample(resample)
+        returns = returns.resample(resample).apply(lambda x: (x+1).prod() - 1)
         returns = returns.last() if compound is True else returns.sum(axis=0)
         if isinstance(benchmark, _pd.Series):
             benchmark = benchmark.resample(resample)
@@ -379,7 +379,7 @@ def plot_timeseries(
             ax.get_legend().remove()
     except Exception:
         pass
-    
+
     try:
         _plt.subplots_adjust(hspace=0, bottom=0, top=1)
     except Exception:
