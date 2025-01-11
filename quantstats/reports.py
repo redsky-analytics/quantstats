@@ -155,7 +155,7 @@ def html(
 
     if benchmark is not None:
         yoy = _stats.compare(
-            returns, benchmark, "YE", compounded=compounded, prepare_returns=False
+            returns, benchmark, "Y", compounded=compounded, prepare_returns=False
         )
         if isinstance(returns, _pd.Series):
             yoy.columns = [benchmark_title, strategy_title, "Multiplier", "Won"]
@@ -1572,7 +1572,7 @@ def _download_html(html, filename="quantstats-tearsheet.html"):
         " ",
         """<script>
     var bl=new Blob(['{{html}}'],{type:"text/html"});
-    var a=document.createElement("YE");
+    var a=document.createElement("Y");
     a.href=URL.createObjectURL(bl);
     a.download="{{filename}}";
     a.hidden=true;document.body.appendChild(a);

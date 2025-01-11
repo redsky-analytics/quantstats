@@ -79,9 +79,9 @@ def distribution(returns, compounded=True, prepare_returns=True):
     return {
         "Daily": get_outliers(daily),
         "Weekly": get_outliers(daily.resample("W-MON").apply(apply_fnc)),
-        "Monthly": get_outliers(daily.resample("ME").apply(apply_fnc)),
-        "Quarterly": get_outliers(daily.resample("QE").apply(apply_fnc)),
-        "Yearly": get_outliers(daily.resample("YE").apply(apply_fnc)),
+        "Monthly": get_outliers(daily.resample("M").apply(apply_fnc)),
+        "Quarterly": get_outliers(daily.resample("Q").apply(apply_fnc)),
+        "Yearly": get_outliers(daily.resample("Y").apply(apply_fnc)),
     }
 
 

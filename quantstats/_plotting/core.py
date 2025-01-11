@@ -100,7 +100,7 @@ def plot_returns_bars(
     hlw=None,
     hlcolor="red",
     hllabel="",
-    resample="YE",
+    resample="Y",
     title="Returns",
     match_volatility=False,
     log_scale=False,
@@ -373,9 +373,13 @@ def plot_timeseries(
         )
     ax.yaxis.set_label_coords(-0.1, 0.5)
 
-    if benchmark is None and len(_pd.DataFrame(returns).columns) == 1:
-        ax.get_legend().remove()
-
+    
+    try:
+        if benchmark is None and len(_pd.DataFrame(returns).columns) == 1:
+            ax.get_legend().remove()
+    except Exception:
+        pass
+    
     try:
         _plt.subplots_adjust(hspace=0, bottom=0, top=1)
     except Exception:
@@ -406,7 +410,7 @@ def plot_timeseries(
 def plot_histogram(
     returns,
     benchmark,
-    resample="ME",
+    resample="M",
     bins=20,
     fontname="Arial",
     grayscale=False,
@@ -1015,13 +1019,13 @@ def plot_distribution(
     port["Weekly"] = port["Daily"].resample("W-MON").apply(apply_fnc)
     port["Weekly"].ffill(inplace=True)
 
-    port["Monthly"] = port["Daily"].resample("ME").apply(apply_fnc)
+    port["Monthly"] = port["Daily"].resample("M").apply(apply_fnc)
     port["Monthly"].ffill(inplace=True)
 
-    port["Quarterly"] = port["Daily"].resample("QE").apply(apply_fnc)
+    port["Quarterly"] = port["Daily"].resample("Q").apply(apply_fnc)
     port["Quarterly"].ffill(inplace=True)
 
-    port["Yearly"] = port["Daily"].resample("YE").apply(apply_fnc)
+    port["Yearly"] = port["Daily"].resample("Y").apply(apply_fnc)
     port["Yearly"].ffill(inplace=True)
 
     fig, ax = _plt.subplots(figsize=figsize)
@@ -1203,7 +1207,7 @@ def format_cur_axis(x, _):
         return res.replace(".0B", "B")
     if x >= 1e6:
         res = "$%1.1fM" % (x * 1e-6)
-        return res.replace(".0M", "ME")
+        return res.replace(".0M", "M")
     if x >= 1e3:
         res = "$%1.0fK" % (x * 1e-3)
         return res.replace(".0K", "K")
