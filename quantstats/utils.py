@@ -142,10 +142,10 @@ def aggregate_returns(returns, period=None, compounded=True):
     if "eow" in period or period == "W":
         return group_returns(returns, [index.year, index.week], compounded=compounded)
 
-    if "eom" in period or period == "ME":
+    if "eom" in period or period == "M":
         return group_returns(returns, [index.year, index.month], compounded=compounded)
 
-    if "eoq" in period or period == "QE":
+    if "eoq" in period or period == "Q":
         return group_returns(
             returns, [index.year, index.quarter], compounded=compounded
         )
