@@ -62,13 +62,15 @@ def html(
     periods_per_year=252,
     download_filename="quantstats-tearsheet.html",
     figfmt="svg",
+    metric_mode='full',
+    plot_mode='basic',
     template_path=None,
     match_dates=True,
     **kwargs,
 ):
 
-    if output is None and not _utils._in_notebook():
-        raise ValueError("`output` must be specified")
+    # if output is None and not _utils._in_notebook():
+    #     raise ValueError("`output` must be specified")
 
     if match_dates:
         returns = returns.dropna()
@@ -119,14 +121,14 @@ def html(
     if isinstance(returns, _pd.Series):
         returns.name = strategy_title
     elif isinstance(returns, _pd.DataFrame):
-        returns.columns = strategy_title
+        returns.columns = [strategy_title]
 
     mtrx = metrics(
         returns=returns,
         benchmark=benchmark,
         rf=rf,
         display=False,
-        mode="full",
+        mode=metric_mode,
         sep=True,
         internal="True",
         compounded=compounded,
@@ -258,140 +260,143 @@ def html(
         )
         tpl = tpl.replace("{{vol_returns}}", _embed_figure(figfile, figfmt))
 
-    figfile = _utils._file_stream()
-    _plots.yearly_returns(
-        returns,
-        benchmark,
-        grayscale=grayscale,
-        figsize=(8, 4),
-        subtitle=False,
-        savefig={"fname": figfile, "format": figfmt},
-        show=False,
-        ylabel='',
-        compounded=compounded,
-        prepare_returns=False,
-    )
-    tpl = tpl.replace("{{eoy_returns}}", _embed_figure(figfile, figfmt))
-
-    figfile = _utils._file_stream()
-    _plots.histogram(
-        returns,
-        benchmark,
-        grayscale=grayscale,
-        figsize=(7, 4),
-        subtitle=False,
-        savefig={"fname": figfile, "format": figfmt},
-        show=False,
-        ylabel='',
-        compounded=compounded,
-        prepare_returns=False,
-    )
-    tpl = tpl.replace("{{monthly_dist}}", _embed_figure(figfile, figfmt))
-
-    figfile = _utils._file_stream()
-    _plots.daily_returns(
-        returns,
-        benchmark,
-        grayscale=grayscale,
-        figsize=(8, 3),
-        subtitle=False,
-        savefig={"fname": figfile, "format": figfmt},
-        show=False,
-        ylabel='',
-        prepare_returns=False,
-        active=active,
-    )
-    tpl = tpl.replace("{{daily_returns}}", _embed_figure(figfile, figfmt))
-
-    if benchmark is not None:
+    if plot_mode == 'full': 
         figfile = _utils._file_stream()
-        _plots.rolling_beta(
+        _plots.yearly_returns(
             returns,
             benchmark,
             grayscale=grayscale,
-            figsize=(8, 3),
-            subtitle=False,
-            window1=win_half_year,
-            window2=win_year,
-            savefig={"fname": figfile, "format": figfmt},
-            show=False,
-            ylabel='',
-            prepare_returns=False,
-        )
-        tpl = tpl.replace("{{rolling_beta}}", _embed_figure(figfile, figfmt))
-
-    figfile = _utils._file_stream()
-    _plots.rolling_volatility(
-        returns,
-        benchmark,
-        grayscale=grayscale,
-        figsize=(8, 3),
-        subtitle=False,
-        savefig={"fname": figfile, "format": figfmt},
-        show=False,
-        ylabel='',
-        period=win_half_year,
-        periods_per_year=win_year,
-    )
-    tpl = tpl.replace("{{rolling_vol}}", _embed_figure(figfile, figfmt))
-
-    figfile = _utils._file_stream()
-    _plots.rolling_sharpe(
-        returns,
-        grayscale=grayscale,
-        figsize=(8, 3),
-        subtitle=False,
-        savefig={"fname": figfile, "format": figfmt},
-        show=False,
-        ylabel='',
-        period=win_half_year,
-        periods_per_year=win_year,
-    )
-    tpl = tpl.replace("{{rolling_sharpe}}", _embed_figure(figfile, figfmt))
-
-    figfile = _utils._file_stream()
-    _plots.rolling_sortino(
-        returns,
-        grayscale=grayscale,
-        figsize=(8, 3),
-        subtitle=False,
-        savefig={"fname": figfile, "format": figfmt},
-        show=False,
-        ylabel='',
-        period=win_half_year,
-        periods_per_year=win_year,
-    )
-    tpl = tpl.replace("{{rolling_sortino}}", _embed_figure(figfile, figfmt))
-
-    figfile = _utils._file_stream()
-    if isinstance(returns, _pd.Series):
-        _plots.drawdowns_periods(
-            returns,
-            grayscale=grayscale,
             figsize=(8, 4),
             subtitle=False,
-            title=returns.name,
+        savefig={"fname": figfile, "format": figfmt},
+        show=False,
+        ylabel='',
+        compounded=compounded,
+        prepare_returns=False,
+        )
+        tpl = tpl.replace("{{eoy_returns}}", _embed_figure(figfile, figfmt))
+
+        figfile = _utils._file_stream()
+        _plots.histogram(
+            returns,
+            benchmark,
+            grayscale=grayscale,
+            figsize=(7, 4),
+            subtitle=False,
             savefig={"fname": figfile, "format": figfmt},
             show=False,
             ylabel='',
             compounded=compounded,
             prepare_returns=False,
         )
-        tpl = tpl.replace("{{dd_periods}}", _embed_figure(figfile, figfmt))
-    elif isinstance(returns, _pd.DataFrame):
-        embed = []
-        for col in returns.columns:
+        tpl = tpl.replace("{{monthly_dist}}", _embed_figure(figfile, figfmt))
+
+        # figfile = _utils._file_stream()
+        # _plots.daily_returns(
+        #     returns,
+        #     benchmark,
+        #     grayscale=grayscale,
+        #     figsize=(8, 3),
+        #     subtitle=False,
+        #     savefig={"fname": figfile, "format": figfmt},
+        #     show=False,
+        #     ylabel='',
+        #     prepare_returns=False,
+        #     active=active,
+        # )
+        # tpl = tpl.replace("{{daily_returns}}", _embed_figure(figfile, figfmt))
+
+
+        if benchmark is not None:
+            figfile = _utils._file_stream()
+            _plots.rolling_beta(
+                returns,
+                benchmark,
+                grayscale=grayscale,
+                figsize=(8, 3),
+                subtitle=False,
+                window1=win_half_year,
+                window2=win_year,
+                savefig={"fname": figfile, "format": figfmt},
+                show=False,
+                ylabel='',
+                prepare_returns=False,
+                )
+            tpl = tpl.replace("{{rolling_beta}}", _embed_figure(figfile, figfmt))
+
+        figfile = _utils._file_stream()
+        _plots.rolling_volatility(
+            returns,
+            benchmark,
+            grayscale=grayscale,
+            figsize=(8, 3),
+            subtitle=False,
+            savefig={"fname": figfile, "format": figfmt},
+            show=False,
+            ylabel='',
+            period=win_half_year,
+            periods_per_year=win_year,
+        )
+        tpl = tpl.replace("{{rolling_vol}}", _embed_figure(figfile, figfmt))
+
+        figfile = _utils._file_stream()
+        _plots.rolling_sharpe(
+            returns,
+            grayscale=grayscale,
+            figsize=(8, 3),
+            subtitle=False,
+            savefig={"fname": figfile, "format": figfmt},
+            show=False,
+            ylabel='',
+            period=win_half_year,
+            periods_per_year=win_year,
+        )
+        tpl = tpl.replace("{{rolling_sharpe}}", _embed_figure(figfile, figfmt))
+
+        figfile = _utils._file_stream()
+        _plots.rolling_sortino(
+            returns,
+            grayscale=grayscale,
+            figsize=(8, 3),
+            subtitle=False,
+            savefig={"fname": figfile, "format": figfmt},
+            show=False,
+            ylabel='',
+            period=win_half_year,
+            periods_per_year=win_year,
+        )
+        tpl = tpl.replace("{{rolling_sortino}}", _embed_figure(figfile, figfmt))
+
+    if plot_mode == 'full':     
+        figfile = _utils._file_stream()
+        if isinstance(returns, _pd.Series):
             _plots.drawdowns_periods(
-                returns[col],
+                returns,
                 grayscale=grayscale,
                 figsize=(8, 4),
                 subtitle=False,
-                title=col,
+                title=returns.name,
                 savefig={"fname": figfile, "format": figfmt},
                 show=False,
                 ylabel='',
                 compounded=compounded,
                 prepare_returns=False,
+            )
+            tpl = tpl.replace("{{dd_periods}}", _embed_figure(figfile, figfmt))
+        elif isinstance(returns, _pd.DataFrame):
+            embed = []
+            for col in returns.columns:
+                _plots.drawdowns_periods(
+                    returns[col],
+                    grayscale=grayscale,
+                    figsize=(8, 4),
+                    subtitle=False,
+                    title=col,
+                    savefig={"fname": figfile, "format": figfmt},
+                    show=False,
+                    ylabel='',
+                    compounded=compounded,
+                    prepare_returns=False,
             )
             embed.append(figfile)
         tpl = tpl.replace("{{dd_periods}}", _embed_figure(embed, figfmt))
@@ -443,50 +448,53 @@ def html(
             embed.append(figfile)
         tpl = tpl.replace("{{monthly_heatmap}}", _embed_figure(embed, figfmt))
 
-    figfile = _utils._file_stream()
 
-    if isinstance(returns, _pd.Series):
-        _plots.distribution(
-            returns,
-            grayscale=grayscale,
-            figsize=(8, 4),
-            subtitle=False,
-            title=returns.name,
-            savefig={"fname": figfile, "format": figfmt},
-            show=False,
-            ylabel='',
-            compounded=compounded,
-            prepare_returns=False,
-        )
-        tpl = tpl.replace("{{returns_dist}}", _embed_figure(figfile, figfmt))
-    elif isinstance(returns, _pd.DataFrame):
-        embed = []
-        for col in returns.columns:
+    if plot_mode == 'full': 
+        figfile = _utils._file_stream()
+        if isinstance(returns, _pd.Series):
             _plots.distribution(
-                returns[col],
+                returns,
                 grayscale=grayscale,
                 figsize=(8, 4),
                 subtitle=False,
-                title=col,
+                title=returns.name,
                 savefig={"fname": figfile, "format": figfmt},
                 show=False,
                 ylabel='',
                 compounded=compounded,
                 prepare_returns=False,
             )
-            embed.append(figfile)
-        tpl = tpl.replace("{{returns_dist}}", _embed_figure(embed, figfmt))
+            tpl = tpl.replace("{{returns_dist}}", _embed_figure(figfile, figfmt))
+        elif isinstance(returns, _pd.DataFrame):
+            embed = []
+            for col in returns.columns:
+                _plots.distribution(
+                    returns[col],
+                    grayscale=grayscale,
+                    figsize=(8, 4),
+                    subtitle=False,
+                    title=col,
+                    savefig={"fname": figfile, "format": figfmt},
+                    show=False,
+                    ylabel='',
+                    compounded=compounded,
+                    prepare_returns=False,
+                )
+                embed.append(figfile)
+            tpl = tpl.replace("{{returns_dist}}", _embed_figure(embed, figfmt))
 
     tpl = _regex.sub(r"\{\{(.*?)\}\}", "", tpl)
     tpl = tpl.replace("white-space:pre;", "")
 
-    if output is None:
-        # _open_html(tpl)
-        _download_html(tpl, download_filename)
-        return
+    # if output is None:
+    #     # _open_html(tpl)
+    #     _download_html(tpl, download_filename)
+    #     return
 
-    with open(output, "w", encoding="utf-8") as f:
-        f.write(tpl)
+    # with open(output, "w", encoding="utf-8") as f:
+    #     f.write(tpl)
+
+    return tpl
 
 
 def full(
@@ -566,7 +574,7 @@ def full(
         )
 
         if isinstance(dd, _pd.Series):
-            iDisplay(iHTML('<h4 style="margin-bottom:20px">Worst 5 Drawdowns</h4>'))
+            iDisplay(iHTML('<h4 style="margin-bottom:20px">Worst: 5 Drawdowns</h4>'))
             if dd_info.empty:
                 iDisplay(iHTML("<p>(no drawdowns)</p>"))
             else:
@@ -575,7 +583,7 @@ def full(
             for ptf, dd_info in dd_info_dict.items():
                 iDisplay(
                     iHTML(
-                        '<h4 style="margin-bottom:20px">%s - Worst 5 Drawdowns</h4>'
+                        '<h4 style="margin-bottom:20px">%s - Worst:: 5 Drawdowns</h4>'
                         % ptf
                     )
                 )
@@ -600,7 +608,7 @@ def full(
             strategy_title=strategy_title,
         )
         print("\n\n")
-        print("[Worst 5 Drawdowns]\n")
+        print("[Worst::: 5 Drawdowns]\n")
         if isinstance(dd, _pd.Series):
             if dd_info.empty:
                 print("(no drawdowns)")
@@ -859,7 +867,8 @@ def metrics(
         # metrics['Prob. Sortino/√2 Ratio %'] = _stats.probabilistic_adjusted_sortino_ratio(df, rf, win_year, False) * pct
         metrics["Smart Sortino/√2"] = metrics["Smart Sortino"] / _sqrt(2)
         # metrics['Prob. Smart Sortino/√2 Ratio %'] = _stats.probabilistic_adjusted_sortino_ratio(df, rf, win_year, False, True) * pct
-    metrics["Omega"] = _stats.omega(df["returns"], rf, 0.0, win_year)
+    # metrics["Omega"] = _stats.omega(df["returns"], rf, 0.0, win_year)
+    metrics["Omega"] = _stats.omega(df, rf, 0.0, win_year)
 
     metrics["~~~~~~~~"] = blank
     metrics["Max Drawdown %"] = blank
@@ -903,17 +912,17 @@ def metrics(
             elif isinstance(returns, _pd.DataFrame):
                 metrics["R^2"] = (
                     [
-                        _stats.r_squared(
+                        round(_stats.r_squared(
                             df[strategy_col], df["benchmark"], prepare_returns=False
-                        ).round(2)
+                        ), 2)
                         for strategy_col in df_strategy_columns
                     ]
                 ) + ["-"]
                 metrics["Information Ratio"] = (
                     [
-                        _stats.information_ratio(
+                        round(_stats.information_ratio(
                             df[strategy_col], df["benchmark"], prepare_returns=False
-                        ).round(2)
+                        ), 2)
                         for strategy_col in df_strategy_columns
                     ]
                 ) + ["-"]
@@ -1339,16 +1348,16 @@ def plots(
             figsize[0] * (0.33 * (len(returns.columns) * 0.66)),
         )
 
-    _plots.daily_returns(
-        returns,
-        benchmark,
-        grayscale=grayscale,
-        figsize=small_fig_size,
-        show=True,
-        ylabel='',
-        prepare_returns=False,
-        active=active,
-    )
+    # _plots.daily_returns(
+    #     returns,
+    #     benchmark,
+    #     grayscale=grayscale,
+    #     figsize=small_fig_size,
+    #     show=True,
+    #     ylabel='',
+    #     prepare_returns=False,
+    #     active=active,
+    # )
 
     if benchmark is not None:
         _plots.rolling_beta(

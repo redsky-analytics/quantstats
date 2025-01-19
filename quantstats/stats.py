@@ -491,10 +491,7 @@ def omega(returns, rf=0.0, required_return=0.0, periods=252):
     numer = returns_less_thresh[returns_less_thresh > 0.0].sum()
     denom = -1.0 * returns_less_thresh[returns_less_thresh < 0.0].sum()
 
-    if denom > 0.0:
-        return numer / denom
-
-    return _np.nan
+    return (numer / denom).where(denom>0)
 
 
 def gain_to_pain_ratio(returns, rf=0, resolution="D"):
