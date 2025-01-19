@@ -1484,22 +1484,13 @@ def _calc_dd(df, display=True, as_pct=False):
     if dd_info.empty:
         return _pd.DataFrame()
 
-    if "returns" in dd_info:
-        ret_dd = dd_info["returns"]
-    # to match multiple columns like returns_1, returns_2, ...
-    elif (
-        any(dd_info.columns.get_level_values(0).str.contains("returns"))
-        and dd_info.columns.get_level_values(0).nunique() > 1
-    ):
-        ret_dd = dd_info.loc[
-            :, dd_info.columns.get_level_values(0).str.contains("returns")
-        ]
-    else:
-        ret_dd = dd_info
+    ret_dd = dd_info
+
 
     if (
-        any(ret_dd.columns.get_level_values(0).str.contains("returns"))
-        and ret_dd.columns.get_level_values(0).nunique() > 1
+        ret_dd.columns.nlevels >1 
+        and any(ret_dd.columns.get_level_values(0).str.contains("returns"))
+        # and ret_dd.columns.get_level_values(0).nunique() > 1
     ):
         dd_stats = {
             col: {
@@ -1519,7 +1510,9 @@ def _calc_dd(df, display=True, as_pct=False):
             }
             for col in ret_dd.columns.get_level_values(0)
         }
-    else:
+    elif ret_dd.columns.nlevels ==1:
+
+        
         dd_stats = {
             "returns": {
                 "Max Drawdown %": ret_dd.sort_values(by="max drawdown", ascending=True)[
@@ -1528,15 +1521,17 @@ def _calc_dd(df, display=True, as_pct=False):
                 / 100,
                 "Longest DD Days": str(
                     _np.round(
-                        ret_dd.sort_values(by="days", ascending=False)["days"].values[0]
+                        retdd_returns.sort_values(by="days", ascending=False)["days"].values[0]
                     )
                 ),
-                "Avg. Drawdown %": ret_dd["max drawdown"].mean() / 100,
-                "Avg. Drawdown Days": str(_np.round(ret_dd["days"].mean())),
+                "Avg. Drawdown %": retdd_returns["max drawdown"].mean() / 100,
+                "Avg. Drawdown Days": str(_np.round(retdd_returns["days"].mean())),
             }
         }
+
     if "benchmark" in df and (dd_info.columns, _pd.MultiIndex):
-        bench_dd = dd_info["benchmark"].sort_values(by="max drawdown")
+        retdd_banchmark = ret_dd["benchmark"]
+        bench_dd = retdd_banchmark.sort_values(by="max drawdown")
         dd_stats["benchmark"] = {
             "Max Drawdown %": bench_dd.sort_values(by="max drawdown", ascending=True)[
                 "max drawdown"
